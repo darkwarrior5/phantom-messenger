@@ -76,7 +76,7 @@ export async function aesEncrypt(
         {
           name: 'AES-GCM',
           iv: nonce,
-          additionalData: associatedData,
+          ...(associatedData && { additionalData: associatedData }),
           tagLength: GCM_TAG_SIZE * 8
         },
         cryptoKey,
@@ -175,7 +175,7 @@ export async function aesDecrypt(
         {
           name: 'AES-GCM',
           iv: nonce,
-          additionalData: associatedData,
+          ...(associatedData && { additionalData: associatedData }),
           tagLength: GCM_TAG_SIZE * 8
         },
         cryptoKey,

@@ -6,11 +6,11 @@
 
 import type { ProtocolMessage, ProtocolMessageType } from '@phantom/shared';
 import { generateRequestId } from '@phantom/shared';
-import { 
-  sign, 
-  bytesToBase64, 
+import {
+  sign,
+  bytesToBase64,
   base64ToBytes,
-  stringToBytes 
+  stringToBytes
 } from '@phantom/crypto';
 import { useConnectionStore, useIdentityStore } from '../store';
 
@@ -94,7 +94,7 @@ class WebSocketClient {
 
     // Step 1: Request challenge
     const challengeResponse = await this.sendRequest('authenticate', {});
-    
+
     if (!challengeResponse || !('challenge' in (challengeResponse as object))) {
       throw new Error('Invalid challenge response');
     }
@@ -104,7 +104,7 @@ class WebSocketClient {
     // Step 2: Sign challenge
     const challengeBytes = stringToBytes(challenge);
     const signResult = sign(challengeBytes, identity.signingKeyPair.secretKey);
-    
+
     if (!signResult.success || !signResult.data) {
       throw new Error('Failed to sign challenge');
     }
@@ -125,10 +125,54 @@ class WebSocketClient {
 
     if ((authResponse as { success?: boolean })?.success) {
       useConnectionStore.getState().setStatus('authenticated');
+
+      // Auto-sync messages on successful authentication
+      this.performAutoSync();
+
       return true;
     }
 
     return false;
+  }
+
+  /**
+   * Auto-sync messages after authentication
+   * Fetches messages since last sync timestamp
+   */
+  private async performAutoSync(): Promise<void> {
+    try {
+      // Get last sync timestamp from localStorage
+      const lastSyncKey = 'phantom_last_sync';
+      const lastSyncStr = localStorage.getItem(lastSyncKey);
+      const sinceTimestamp = lastSyncStr ? parseInt(lastSyncStr, 10) : undefined;
+
+      console.log('[Sync] Starting auto-sync...', sinceTimestamp ? `since ${new Date(sinceTimestamp).toISOString()}` : 'full sync');
+
+      // Fetch missed messages
+      const messages = await this.syncMessages(sinceTimestamp);
+
+      console.log(`[Sync] Received ${messages.length} messages`);
+
+      // Store current timestamp for next sync
+      localStorage.setItem(lastSyncKey, Date.now().toString());
+
+      // Emit sync event for UI to process
+      if (messages.length > 0) {
+        const handlers = this.handlers.get('sync-response');
+        if (handlers) {
+          handlers.forEach(handler => {
+            handler({
+              type: 'sync-response',
+              requestId: 'auto-sync',
+              payload: { messages, isAutoSync: true },
+              timestamp: Date.now()
+            });
+          });
+        }
+      }
+    } catch (error) {
+      console.error('[Sync] Auto-sync failed:', error);
+    }
   }
 
   /**
@@ -199,7 +243,7 @@ class WebSocketClient {
       if (pending) {
         clearTimeout(pending.timeout);
         this.pendingRequests.delete(message.requestId);
-        
+
         if (message.type === 'error') {
           pending.reject(new Error((message.payload as { message?: string })?.message ?? 'Unknown error'));
         } else {

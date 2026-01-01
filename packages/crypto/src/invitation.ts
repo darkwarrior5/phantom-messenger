@@ -11,15 +11,15 @@ import type {
   DisposableIdentity,
   Base64String
 } from './types.js';
-import { 
-  aesEncrypt, 
-  aesDecrypt, 
-  generateAESKey 
+import {
+  aesEncrypt,
+  aesDecrypt,
+  generateAESKey
 } from './aes.js';
-import { 
-  sign, 
-  verify, 
-  hkdf 
+import {
+  sign,
+  verify,
+  hkdf
 } from './keyExchange.js';
 import {
   randomBytes,
@@ -51,23 +51,23 @@ export async function generateInvitation(
         error: 'Cannot generate invitation with destroyed identity'
       };
     }
-    
+
     const {
       expiresIn = DEFAULT_EXPIRATION_MS,
       singleUse = true,
       maxUses = 1,
       metadata = {}
     } = options;
-    
+
     // Generate unique invitation ID
     const invitationId = randomBytes(32);
-    
+
     // Generate invitation secret (used for derivation)
     const invitationSecret = randomBytes(32);
-    
+
     // Calculate expiration
     const expiresAt = Date.now() + expiresIn;
-    
+
     // Create invitation data
     const invitationData: InvitationData = {
       creatorId: bytesToBase64(creator.id),
@@ -80,7 +80,7 @@ export async function generateInvitation(
       metadata,
       createdAt: Date.now()
     };
-    
+
     // Derive encryption key from invitation secret
     const encryptionKey = await hkdf(
       invitationSecret,
@@ -88,37 +88,37 @@ export async function generateInvitation(
       stringToBytes('PhantomInvitation'),
       32
     );
-    
+
     // Encrypt invitation data
     const plaintext = stringToBytes(JSON.stringify(invitationData));
     const encrypted = await aesEncrypt(
       plaintext,
       { key: encryptionKey, algorithm: 'AES-256-GCM' }
     );
-    
+
     if (!encrypted.success || !encrypted.data) {
       return {
         success: false,
-        error: 'Failed to encrypt invitation data'
+        error: `Failed to encrypt invitation data: ${encrypted.error || 'Unknown encryption error'}`
       };
     }
-    
+
     // Create signature over invitation
     const signatureData = concatBytes(
       invitationId,
       encrypted.data.ciphertext,
       new Uint8Array(new BigUint64Array([BigInt(expiresAt)]).buffer)
     );
-    
+
     const signResult = sign(signatureData, creator.signingKeyPair.secretKey);
-    
+
     if (!signResult.success || !signResult.data) {
       return {
         success: false,
         error: 'Failed to sign invitation'
       };
     }
-    
+
     // Create the secure invitation
     const invitation: SecureInvitation = {
       id: invitationId,
@@ -137,13 +137,13 @@ export async function generateInvitation(
       singleUse,
       isRevoked: false
     };
-    
+
     // Generate human-readable invitation code
     const invitationCode = generateInvitationCode(invitationId, invitationSecret);
-    
+
     // Clean up
     secureWipe(encryptionKey);
-    
+
     return {
       success: true,
       data: {
@@ -176,9 +176,9 @@ export async function validateInvitation(
         error: 'Invalid invitation code format'
       };
     }
-    
+
     const { invitationId, secret, encryptedData, signature, expiresAt } = parsed;
-    
+
     // Check expiration
     if (Date.now() > expiresAt) {
       return {
@@ -186,23 +186,23 @@ export async function validateInvitation(
         error: 'Invitation has expired'
       };
     }
-    
+
     // Verify signature
     const signatureData = concatBytes(
       invitationId,
       encryptedData.ciphertext,
       new Uint8Array(new BigUint64Array([BigInt(expiresAt)]).buffer)
     );
-    
+
     const isValidSignature = verify(signatureData, signature, creatorSigningKey);
-    
+
     if (!isValidSignature) {
       return {
         success: false,
         error: 'Invalid invitation signature'
       };
     }
-    
+
     // Derive decryption key
     const decryptionKey = await hkdf(
       secret,
@@ -210,7 +210,7 @@ export async function validateInvitation(
       stringToBytes('PhantomInvitation'),
       32
     );
-    
+
     // Decrypt invitation data
     const decrypted = await aesDecrypt(
       encryptedData.ciphertext,
@@ -218,19 +218,19 @@ export async function validateInvitation(
       encryptedData.tag,
       { key: decryptionKey, algorithm: 'AES-256-GCM' }
     );
-    
+
     // Clean up
     secureWipe(decryptionKey);
-    
+
     if (!decrypted.success || !decrypted.data) {
       return {
         success: false,
         error: 'Failed to decrypt invitation'
       };
     }
-    
+
     const invitationData: InvitationData = JSON.parse(bytesToString(decrypted.data));
-    
+
     // Validate invitation data
     if (invitationData.usesRemaining <= 0) {
       return {
@@ -238,7 +238,7 @@ export async function validateInvitation(
         error: 'Invitation has been used'
       };
     }
-    
+
     return {
       success: true,
       data: invitationData
@@ -274,13 +274,13 @@ function generateInvitationCode(invitationId: Bytes, secret: Bytes): string {
   // Combine ID and secret, encode as base64
   const combined = concatBytes(invitationId, secret);
   const encoded = bytesToBase64(combined);
-  
+
   // Format as groups of 4 characters for readability
   const groups: string[] = [];
   for (let i = 0; i < encoded.length; i += 4) {
     groups.push(encoded.slice(i, i + 4));
   }
-  
+
   return `PHM-${groups.slice(0, 8).join('-')}`;
 }
 
@@ -291,17 +291,17 @@ function parseInvitationCode(code: string): ParsedInvitationCode | null {
   try {
     // Remove prefix and dashes
     const cleaned = code.replace(/^PHM-/, '').replace(/-/g, '');
-    
+
     // Decode
     const combined = base64ToBytes(cleaned);
-    
+
     if (combined.length < 64) {
       return null;
     }
-    
+
     const invitationId = combined.slice(0, 32);
     const secret = combined.slice(32, 64);
-    
+
     // Additional data if present
     let encryptedData = {
       ciphertext: new Uint8Array(0),
@@ -310,12 +310,12 @@ function parseInvitationCode(code: string): ParsedInvitationCode | null {
     };
     let signature = new Uint8Array(0);
     let expiresAt = 0;
-    
+
     if (combined.length > 64) {
       // Parse remaining data
       // This would be included in a full invitation package
     }
-    
+
     return {
       invitationId,
       secret,
