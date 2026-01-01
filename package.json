@@ -1,0 +1,33 @@
+{
+  "name": "phantom-messenger",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Secure, anonymous, cross-platform messaging application with end-to-end encryption",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "test:security": "turbo run test:security",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
+    "server:dev": "npm run dev --workspace=@phantom/server",
+    "web:dev": "npm run dev --workspace=@phantom/web",
+    "mobile:ios": "npm run ios --workspace=@phantom/mobile",
+    "mobile:android": "npm run android --workspace=@phantom/mobile"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "prettier": "^3.1.0",
+    "turbo": "^1.11.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "packageManager": "npm@10.2.0"
+}

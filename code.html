@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ChatApp - Invitation Access</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white antialiased selection:bg-primary/30">
+<div class="min-h-screen flex w-full">
+<div class="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-[#0a1016]">
+<div class="absolute top-[-20%] left-[-10%] w-[80%] h-[80%] rounded-full bg-primary/20 blur-[120px]"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-purple-500/10 blur-[100px]"></div>
+<div class="relative z-10 flex flex-col justify-between p-16 w-full h-full">
+<div class="flex items-center gap-3">
+<div class="size-10 flex items-center justify-center rounded-xl bg-primary text-white shadow-lg shadow-primary/40">
+<span class="material-symbols-outlined text-[28px]">shield_lock</span>
+</div>
+<span class="text-2xl font-bold tracking-tight text-white">GhostChat</span>
+</div>
+<div class="space-y-6">
+<h1 class="text-5xl font-extrabold leading-tight text-white">
+                        Private messaging,<br/>
+<span class="text-primary">invitation only.</span>
+</h1>
+<p class="text-lg text-slate-400 max-w-md">
+                        Zero knowledge architecture. End-to-end encryption. No server logs. Your identity is disposable and generated on entry.
+                    </p>
+</div>
+<div class="flex items-center gap-4 text-sm text-slate-500 font-medium">
+<span>© 2024 GhostChat Inc.</span>
+<span class="w-1 h-1 rounded-full bg-slate-600"></span>
+<a class="hover:text-primary transition-colors" href="#">Manifesto</a>
+<span class="w-1 h-1 rounded-full bg-slate-600"></span>
+<a class="hover:text-primary transition-colors" href="#">Security</a>
+</div>
+</div>
+<img alt="Background pattern" class="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-overlay pointer-events-none" data-alt="Abstract dark fluid waves representing digital connection" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOmbTeMbxm_ZnjWfz4PoeFhWB0BZPNRcKpBYrZ21dkJu4EijX83SSC2z7j68pPYhL-eYYMKOPFOhRtuo4RSNCy4gABozPUoYXsRPVAzmvupuc3A7zWeGb_xWbXm-yVnDWjhREm29dPZbDsJ11o6iNp1SGI1grpSYzHCAdV1uYMIYWWRHGQnpnBHk6T-wATD8h2KqAUR75JNkjaeW9F2XoD0LPrO3Rp1WuvdvdF9tVnNoqSrurouu1MGQQC7O5Nxqw11qjRDmUTEcn0"/>
+</div>
+<div class="flex flex-1 flex-col items-center justify-center p-6 lg:p-24 w-full bg-background-light dark:bg-background-dark relative">
+<div class="absolute top-6 left-6 lg:hidden flex items-center gap-2 mb-8">
+<div class="size-8 flex items-center justify-center rounded-lg bg-primary text-white">
+<span class="material-symbols-outlined text-xl">shield_lock</span>
+</div>
+<span class="text-xl font-bold text-slate-900 dark:text-white">GhostChat</span>
+</div>
+<div class="w-full max-w-[440px] flex flex-col gap-8">
+<div class="text-center space-y-2">
+<div class="inline-flex items-center justify-center p-3 rounded-full bg-primary/10 text-primary mb-4">
+<span class="material-symbols-outlined text-[32px]">vpn_key</span>
+</div>
+<h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Invitation Access</h2>
+<p class="text-slate-500 dark:text-slate-400 max-w-xs mx-auto">Enter your secure code to generate a disposable identity.</p>
+</div>
+<form class="flex flex-col gap-6">
+<div class="space-y-2">
+<label class="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1" for="invite-code">Secure Invitation Code</label>
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined">password</span>
+</div>
+<input autocomplete="off" class="w-full bg-white dark:bg-[#1c242c] border border-slate-200 dark:border-[#2c353f] text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-lg font-mono tracking-wider rounded-full py-4 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200 uppercase" id="invite-code" placeholder="XXXX-XXXX-XXXX" type="text"/>
+</div>
+<p class="text-xs text-slate-400 ml-2">Codes are case-sensitive and single-use only.</p>
+</div>
+<button class="mt-2 w-full bg-primary hover:bg-blue-600 text-white font-bold text-base py-4 px-6 rounded-full shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-200 flex items-center justify-center gap-2 group" type="submit">
+<span>Generate Identity &amp; Enter</span>
+<span class="material-symbols-outlined text-[20px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</form>
+<div class="rounded-2xl bg-slate-100 dark:bg-[#151d25] p-5 border border-slate-200 dark:border-[#2c353f] flex gap-4 items-start">
+<span class="material-symbols-outlined text-slate-400 mt-0.5 shrink-0">info</span>
+<div class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+<strong class="text-slate-700 dark:text-slate-200">Anonymous Access:</strong> 
+                        We do not collect email addresses or phone numbers. A unique, disposable ID will be assigned to this session.
+                    </div>
+</div>
+<div class="text-center">
+<a class="text-sm font-medium text-slate-400 hover:text-primary transition-colors" href="#">How do I get an invitation?</a>
+</div>
+</div>
+</div>
+</div>
+
+</body></html>
