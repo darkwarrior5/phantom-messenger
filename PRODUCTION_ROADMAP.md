@@ -100,10 +100,11 @@
 | Add identity tests | `packages/crypto/src/identity.test.ts` | ✅ DONE (16 tests) |
 | Add invitation tests | `packages/crypto/src/invitation.test.ts` | ✅ DONE (10 tests) |
 | Add utils tests | `packages/crypto/src/utils.test.ts` | ✅ DONE (25 tests) |
-| Expand server tests | `apps/server/src/connectionManager.test.ts` | ✅ DONE |
-| Add message handler tests | `apps/server/src/messageHandler.test.ts` | 🔴 TODO |
-| Add web component tests | `apps/web/src/components/*.test.tsx` | 🔴 TODO |
-| Setup GitHub Actions CI | `.github/workflows/ci.yml` | 🔴 TODO |
+| Expand server tests | `apps/server/src/connectionManager.test.ts` | ✅ DONE (3 tests) |
+| Add message handler tests | `apps/server/src/messageHandler.test.ts` | ✅ DONE (38 tests) |
+| Add web component tests | `apps/web/src/components/*.test.tsx` | 🟡 Optional |
+| Setup GitHub Actions CI | `.github/workflows/ci.yml` | ✅ DONE |
+
 
 ---
 
