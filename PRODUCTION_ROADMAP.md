@@ -1,13 +1,15 @@
 # 👻 Phantom Messenger - Production Roadmap
 
 **Generated:** January 3, 2026  
-**Current Progress:** ~70%  
+**Current Progress:** ~80%  
 **Target:** 100% Production Ready  
 
 ---
 
 ## 🎉 Recent Completions
+- [x] **Phase 1 Crypto Tests** - 86/86 tests passing (Jan 4, 2026)
 - [x] **Supabase Authentication** - Email-based login working (Jan 4, 2026)  
+- [x] **User Connection System** - Invitation codes working (Jan 4, 2026)
 
 ---
 
@@ -15,11 +17,11 @@
 
 | Component | Status | Progress |
 |-----------|--------|----------|
-| Crypto Library | ✅ Complete | 95% |
+| Crypto Library | ✅ Complete | 98% |
 | WebSocket Server | ✅ Complete | 85% |
 | Web Client | ✅ Complete | 80% |
 | Mobile App | 🟡 Skeleton | 30% |
-| Testing | 🔴 Minimal | 20% |
+| Testing | 🟡 In Progress | 60% |
 | Infrastructure | 🟡 Documented | 50% |
 
 ---
@@ -87,17 +89,18 @@
 ## 🚧 PHASE-BY-PHASE IMPLEMENTATION PLAN
 
 ### Phase 1: Testing & Quality Assurance
-**Progress Gain:** +10% → 75%  
+**Progress Gain:** +10% → 80%  
 **Estimated Time:** 2-3 days
 
 | Task | File | Status |
 |------|------|--------|
-| Expand crypto E2E tests | `packages/crypto/src/e2e.test.ts` | 🔴 TODO |
-| Add AES unit tests | `packages/crypto/src/aes.test.ts` | 🔴 TODO |
-| Add key exchange tests | `packages/crypto/src/keyExchange.test.ts` | 🔴 TODO |
-| Add identity tests | `packages/crypto/src/identity.test.ts` | 🔴 TODO |
-| Add invitation tests | `packages/crypto/src/invitation.test.ts` | 🔴 TODO |
-| Expand server tests | `apps/server/src/connectionManager.test.ts` | 🔴 TODO |
+| Expand crypto E2E tests | `packages/crypto/src/e2e.test.ts` | ✅ DONE |
+| Add AES unit tests | `packages/crypto/src/aes.test.ts` | ✅ DONE (16 tests) |
+| Add key exchange tests | `packages/crypto/src/keyExchange.test.ts` | ✅ DONE (18 tests) |
+| Add identity tests | `packages/crypto/src/identity.test.ts` | ✅ DONE (16 tests) |
+| Add invitation tests | `packages/crypto/src/invitation.test.ts` | ✅ DONE (10 tests) |
+| Add utils tests | `packages/crypto/src/utils.test.ts` | ✅ DONE (25 tests) |
+| Expand server tests | `apps/server/src/connectionManager.test.ts` | ✅ DONE |
 | Add message handler tests | `apps/server/src/messageHandler.test.ts` | 🔴 TODO |
 | Add web component tests | `apps/web/src/components/*.test.tsx` | 🔴 TODO |
 | Setup GitHub Actions CI | `.github/workflows/ci.yml` | 🔴 TODO |
