@@ -1,0 +1,36 @@
+# Render.com Configuration for Phantom Messenger Server
+# https://render.com/docs/yaml-spec
+
+services:
+  - type: web
+    name: phantom-server
+    runtime: node
+    region: oregon  # or frankfurt, singapore, ohio
+    plan: free
+    buildCommand: npm ci && npm run build --workspace=@phantom/crypto --workspace=@phantom/shared --workspace=@phantom/server
+    startCommand: node apps/server/dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 8080
+      - key: HOST
+        value: 0.0.0.0
+      - key: WS_PING_INTERVAL
+        value: 30000
+      - key: WS_PING_TIMEOUT
+        value: 10000
+      - key: ENABLE_RATE_LIMITING
+        value: true
+      - key: MAX_CONNECTIONS_PER_IP
+        value: 5
+      - key: REQUIRE_INVITATION
+        value: true
+      # Supabase credentials - set these in Render dashboard
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+    healthCheckPath: /health

@@ -35,7 +35,7 @@ export class PhantomServer {
     this.rateLimiter = new RateLimiter();
     this.connectionManager = new ConnectionManager();
     this.messageStore = new MessageStore();
-    
+
     // Initialize Supabase if configured
     if (config.supabase.url && config.supabase.anonKey) {
       this.database = new DatabaseService(
@@ -46,7 +46,7 @@ export class PhantomServer {
     } else {
       console.log('[Storage] Using in-memory store (development mode)');
     }
-    
+
     this.messageHandler = new MessageHandler(
       this.connectionManager,
       this.rateLimiter,
@@ -68,7 +68,7 @@ export class PhantomServer {
           if (req.url === '/health') {
             const messageStats = this.messageStore.getStats();
             res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ 
+            res.end(JSON.stringify({
               status: 'ok',
               connections: this.connectionManager.getConnectionCount(),
               authenticated: this.connectionManager.getAuthenticatedCount(),
@@ -85,7 +85,7 @@ export class PhantomServer {
         });
 
         // Create WebSocket server
-        this.wss = new WebSocketServer({ 
+        this.wss = new WebSocketServer({
           server: this.httpServer,
           path: '/ws'
         });
@@ -122,8 +122,8 @@ export class PhantomServer {
     const ipHash = this.rateLimiter.hashIP(ip);
 
     // Check connection rate limit
-    if (this.config.enableRateLimiting && 
-        this.rateLimiter.checkConnectionLimit(ipHash, this.config.maxConnectionsPerIP)) {
+    if (this.config.enableRateLimiting &&
+      this.rateLimiter.checkConnectionLimit(ipHash, this.config.maxConnectionsPerIP)) {
       socket.close(1013, 'Rate limit exceeded');
       return;
     }
@@ -132,6 +132,7 @@ export class PhantomServer {
     const connection = this.connectionManager.addConnection(socket, ipHash);
 
     // Set up ping/pong for connection health
+    // Browser WebSockets handle ping/pong at the protocol level automatically
     const pingInterval = setInterval(() => {
       if (socket.readyState === WebSocket.OPEN) {
         socket.ping();
@@ -140,18 +141,22 @@ export class PhantomServer {
 
     this.pingIntervals.set(connection.clientId, pingInterval);
 
-    // Handle pong timeout
-    let pongReceived = true;
+    // Handle pong timeout - only terminate if we've sent pings but got no response
+    // The check interval should be longer than ping interval to allow time for pong
+    let missedPongs = 0;
+    const maxMissedPongs = 3; // Allow 3 missed pongs before terminating
+
     socket.on('ping', () => socket.pong());
-    socket.on('pong', () => { pongReceived = true; });
+    socket.on('pong', () => { missedPongs = 0; }); // Reset on successful pong
 
     const pongCheck = setInterval(() => {
-      if (!pongReceived) {
+      missedPongs++;
+      if (missedPongs >= maxMissedPongs) {
+        console.log('[Connection] Terminating idle connection');
         socket.terminate();
         return;
       }
-      pongReceived = false;
-    }, this.config.pingTimeout);
+    }, this.config.pingInterval); // Check at same interval as ping
 
     // Handle messages
     socket.on('message', async (data) => {
@@ -188,7 +193,7 @@ export class PhantomServer {
       const ips = Array.isArray(forwarded) ? forwarded[0] : forwarded;
       return ips?.split(',')[0]?.trim() ?? 'unknown';
     }
-    
+
     return request.socket.remoteAddress ?? 'unknown';
   }
 
@@ -201,7 +206,7 @@ export class PhantomServer {
       clearInterval(interval);
       this.pingIntervals.delete(clientId);
     }
-    
+
     this.connectionManager.removeConnection(clientId);
   }
 
