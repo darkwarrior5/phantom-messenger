@@ -5,15 +5,16 @@
  */
 
 import { useState } from 'react';
-import { 
-  ShieldIcon, 
-  CopyIcon, 
-  CheckIcon, 
-  PlusIcon 
+import {
+  ShieldIcon,
+  CopyIcon,
+  CheckIcon,
+  PlusIcon
 } from './Icons';
 import { useUIStore } from '../store';
-import { generateInvitation } from '@phantom/crypto';
+import { generateInvitation, bytesToBase64 } from '@phantom/crypto';
 import { identityService } from '../services/identity';
+import { storeInvitation } from '../services/supabaseClient';
 
 export function InviteView() {
   const setView = useUIStore((state) => state.setView);
@@ -32,12 +33,22 @@ export function InviteView() {
         throw new Error('No identity found');
       }
 
-      // Generate secure invitation
+      // Generate secure invitation locally
       const result = await generateInvitation(identity);
 
       if (!result.success || !result.data) {
         throw new Error(result.error || 'Failed to generate invitation');
       }
+
+      // Store invitation in Supabase for persistence
+      const publicKey = bytesToBase64(identity.identityKeyPair.publicKey);
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+      await storeInvitation(
+        result.data.invitationCode,
+        publicKey,
+        expiresAt
+      );
 
       setInvitation(result.data.invitationCode);
     } catch (err) {
@@ -152,8 +163,8 @@ export function InviteView() {
                 Security Notice
               </h4>
               <p className="text-yellow-500/80 text-xs">
-                Share this code through a secure channel. Anyone with this code can 
-                establish a connection with you. The code is single-use and expires 
+                Share this code through a secure channel. Anyone with this code can
+                establish a connection with you. The code is single-use and expires
                 after 24 hours.
               </p>
             </div>

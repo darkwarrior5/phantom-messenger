@@ -9,5 +9,6 @@ export { ChatView } from './ChatView';
 export { InviteView } from './InviteView';
 export { SettingsView } from './SettingsView';
 export { DestroyView } from './DestroyView';
+export { AcceptInvitationModal } from './AcceptInvitationModal';
 export { SecurityStatus, SecurityBadge } from './SecurityStatus';
 export * from './Icons';

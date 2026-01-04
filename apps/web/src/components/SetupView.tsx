@@ -7,7 +7,9 @@
 import { useState, useEffect } from 'react';
 import { identityService } from '../services/identity';
 import { wsClient } from '../services/websocket';
+import { signIn, updatePublicKey } from '../services/supabaseClient';
 import { useIdentityStore, useConnectionStore, useUIStore } from '../store';
+import { bytesToBase64 } from '@phantom/crypto';
 
 // Icons as inline SVG components
 const ShieldLockIcon = ({ className }: { className?: string }) => (
@@ -54,7 +56,7 @@ const EyeOffIcon = ({ className }: { className?: string }) => (
 );
 
 export function SetupView() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -88,12 +90,12 @@ export function SetupView() {
   };
 
   const handleLogin = async () => {
-    if (!username.trim()) {
-      setError('Please enter a username');
+    if (!email.trim()) {
+      setError('Please enter your email');
       return;
     }
-    if (username.trim().length < 3) {
-      setError('Username must be at least 3 characters');
+    if (!email.includes('@')) {
+      setError('Please enter a valid email address');
       return;
     }
     if (!password.trim()) {
@@ -109,14 +111,25 @@ export function SetupView() {
     setError(null);
 
     try {
-      // Initialize identity with username/password for deterministic key generation
-      await identityService.initialize(username.trim(), password);
+      // Step 1: Authenticate with Supabase (creates user if doesn't exist)
+      await signIn(email.trim(), password);
+      console.log('[Auth] Supabase authentication successful');
 
-      // Connect to server
+      // Step 2: Initialize deterministic identity from credentials (use email as username)
+      const identity = await identityService.initialize(email.trim(), password);
+      console.log('[Auth] Identity initialized');
+
+      // Step 3: Store public key in profile for discovery
+      const publicKey = bytesToBase64(identity.identityKeyPair.publicKey);
+      await updatePublicKey(publicKey);
+      console.log('[Auth] Public key stored in profile');
+
+      // Step 4: Connect to WebSocket server
       await wsClient.connect();
       await wsClient.authenticate();
     } catch (err) {
-      setError('Failed to login. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to login';
+      setError(errorMessage);
       console.error('Login error:', err);
     } finally {
       setIsLoading(false);
@@ -189,22 +202,22 @@ export function SetupView() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-            {/* Username Field */}
+            {/* Email Field */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-dark-300 ml-1" htmlFor="username">
-                Username
+              <label className="text-sm font-medium text-dark-300 ml-1" htmlFor="email">
+                Email
               </label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-dark-400 group-focus-within:text-phantom-500 transition-colors">
                   <UserIcon className="w-5 h-5" />
                 </div>
                 <input
-                  id="username"
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter your username"
-                  autoComplete="username"
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  autoComplete="email"
                   autoFocus
                   className="w-full bg-dark-800 border border-dark-700 text-white placeholder:text-dark-500 text-base rounded-xl py-4 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-phantom-500/50 focus:border-phantom-500 transition-all duration-200"
                 />
@@ -271,13 +284,13 @@ export function SetupView() {
             <InfoIcon className="w-5 h-5 text-dark-400 mt-0.5 flex-shrink-0" />
             <div className="text-sm text-dark-400 leading-relaxed">
               <strong className="text-dark-200">Deterministic Identity:</strong>{' '}
-              Your identity is cryptographically derived from your credentials. Same username + password = same identity on any device.
+              Your identity is cryptographically derived from your email + password. Same credentials = same identity on any device.
             </div>
           </div>
 
           {/* New User Notice */}
           <div className="text-center text-sm text-dark-400">
-            New user? Just enter your desired credentials — your identity will be created automatically.
+            New user? Just sign in with your email — your account will be created automatically.
           </div>
         </div>
       </div>
