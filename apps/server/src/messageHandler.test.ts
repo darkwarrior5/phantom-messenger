@@ -35,18 +35,17 @@ const createMockConnection = (overrides: Partial<ClientConnection> = {}): Client
     connectedAt: Date.now(),
     lastActivity: Date.now(),
     isAuthenticated: false,
-    publicKey: null,
     ...overrides,
 });
 
 // Helper to parse sent messages
-const getSentMessage = (socket: { send: Mock }): ProtocolMessage | null => {
+const getSentMessage = (socket: { send: Mock }): ProtocolMessage<any> | null => {
     if (socket.send.mock.calls.length === 0) return null;
     const lastCall = socket.send.mock.calls[socket.send.mock.calls.length - 1];
     return JSON.parse(lastCall[0]);
 };
 
-const getAllSentMessages = (socket: { send: Mock }): ProtocolMessage[] => {
+const getAllSentMessages = (socket: { send: Mock }): ProtocolMessage<any>[] => {
     return socket.send.mock.calls.map(call => JSON.parse(call[0]));
 };
 
@@ -204,9 +203,9 @@ describe('MessageHandler', () => {
             const messages = getAllSentMessages(conn.socket as any);
             // Should have challenge response first, then success
             expect(messages.length).toBe(2);
-            expect(messages[0].payload.challenge).toBeDefined();
-            expect(messages[1].type).toBe('authenticate');
-            expect(messages[1].payload.success).toBe(true);
+            expect(messages[0]!.payload.challenge).toBeDefined();
+            expect(messages[1]!.type).toBe('authenticate');
+            expect(messages[1]!.payload.success).toBe(true);
         });
     });
 
@@ -279,7 +278,7 @@ describe('MessageHandler', () => {
 
             // Register connections
             vi.spyOn(connectionManager, 'routeMessage').mockReturnValue(true);
-            vi.spyOn(connectionManager, 'routeToOtherDevices').mockImplementation(() => { });
+            vi.spyOn(connectionManager, 'routeToOtherDevices').mockImplementation(() => true);
             vi.spyOn(connectionManager, 'updateActivity').mockImplementation(() => { });
         });
 
@@ -952,7 +951,7 @@ describe('MessageHandler', () => {
 
             const sent = getSentMessage(authenticatedConnection.socket as any);
             expect(sent?.type).toBe('error');
-            expect(sent?.payload.code).toBe('NOT_SUPPORTED');
+            expect((sent?.payload as any).code).toBe('NOT_SUPPORTED');
         });
     });
 });
