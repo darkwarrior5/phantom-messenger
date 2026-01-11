@@ -7,7 +7,7 @@ services:
     runtime: node
     region: oregon  # or frankfurt, singapore, ohio
     plan: free
-    buildCommand: npm install && npm run build --workspace=@phantom/crypto && npm run build --workspace=@phantom/shared && npm run build --workspace=@phantom/server
+    buildCommand: npm install --include=dev && npm run build --workspace=@phantom/crypto && npm run build --workspace=@phantom/shared && npm run build --workspace=@phantom/server
     startCommand: node apps/server/dist/index.js
     envVars:
       - key: NODE_ENV
